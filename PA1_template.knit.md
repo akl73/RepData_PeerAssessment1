@@ -1,6 +1,12 @@
-# "Reproducible Research - Activity Data Analysis (Assignment 1)"
-## Author: "Anna Lenkiewicz"
-## Date: "June 11, 2016"
+---
+title: "Reproducible Research - Activity Data Analysis (Assignment 1)"
+author: "Anna Lenkiewicz"
+date: "June 11, 2016"
+output: html_document
+---
+
+Common setup and load all packages required in this assignment.
+
 
 
 All files from the repo should be copied to the working directory and executed from there.
