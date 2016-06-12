@@ -7,11 +7,7 @@ output: html_document
 
 Common setup and load all packages required in this assignment.
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(ggplot2)
-library(data.table)
-```
+
 
 All files from the repo should be copied to the working directory and executed from there.
 Data used in this assignment have been downloaded from the [Coursera Reproducible Research Website][1].
@@ -28,7 +24,8 @@ The dataset is stored in a comma-separated-value (activity.csv) file and there a
 
 ## Loading and preprocessing the data
 
-```{r load_data}
+
+```r
 unzip("activity.zip")
 activity <- read.csv("activity.csv", header = TRUE, stringsAsFactors = FALSE)
 activity$date <- as.Date(activity$date)
@@ -36,7 +33,8 @@ activity$date <- as.Date(activity$date)
 
 ## What is mean total number of steps taken per day?
 
-```{r total_steps_hist}
+
+```r
 steps_by_day <- with(activity, aggregate(steps ~ date, FUN = sum, rm.na = TRUE))
 g <- ggplot(steps_by_day, aes(steps)) 
 g + geom_histogram(aes(fill = ..count..), binwidth = 5000) +
@@ -47,16 +45,20 @@ g + geom_histogram(aes(fill = ..count..), binwidth = 5000) +
     theme_bw()
 ```
 
-```{r total_steps_stats}
+<img src="PA1_template_files/figure-html/total_steps_hist-1.png" width="672" />
+
+
+```r
 med = median(steps_by_day$steps)
 mn = as.integer(round(mean(steps_by_day$steps), digits = 0))
 ```
 
-The median of total number of steps taken per day is `r med` and the mean is `r mn`.
+The median of total number of steps taken per day is 10766 and the mean is 10767.
 
 ## What is the average daily activity pattern?
 
-```{r daily_pattern}
+
+```r
 steps_by_interval <- with(activity, aggregate(steps ~ interval, FUN = mean, rm.na = TRUE))
 max_interval = which.max(steps_by_interval$steps)
 interval = steps_by_interval$interval[max_interval]
@@ -74,22 +76,26 @@ g + geom_line(col = "blue") +
     theme_bw()
 ```
 
-The interval `r interval` contains on average maximum number of steps (`r max_steps`).
+<img src="PA1_template_files/figure-html/daily_pattern-1.png" width="672" />
+
+The interval 835 contains on average maximum number of steps (206).
 
 ## Imputing missing values
 
-```{r missing_values_stats}
+
+```r
 missing_values = sum(is.na(activity$steps))
 missing_values_ratio = round(missing_values/nrow(activity)*100, digits = 1)
 ```
 
-There are `r missing_values` in the actvity.csv dataset which gives a proportion of `r missing_values_ratio` %.
+There are 2304 in the actvity.csv dataset which gives a proportion of 13.1 %.
 
 To check if the missing values bias calcluations, the missing values have been imputed using the mean for the corresponding 5-minute interval. Thus, if interval 5 was missing for 05-10-2012, the value was set to the mean for this interval for all days.
 
 The new data set activity_imputed is created which will be used to compare calculation with the first part of thi assignment.
 
-```{r imputting_na}
+
+```r
 activity_imputed <- copy(activity)
 impute.mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
 setDT(activity_imputed)
@@ -98,7 +104,8 @@ activity_imputed[, steps := as.integer(round(impute.mean(steps), digits = 0)), b
 
 Now, let's create the histogram of total number of steps taken each day.
 
-```{r total_steps_hist_imp}
+
+```r
 steps_by_day_imp <- with(activity_imputed, aggregate(steps ~ date, FUN = sum, rm.na = TRUE))
 steps_by_day_counts <- 
 g <- ggplot(steps_by_day_imp, aes(steps)) 
@@ -110,14 +117,17 @@ g + geom_histogram(aes(fill = ..count..), binwidth = 5000) +
     theme_bw()
 ```
 
+<img src="PA1_template_files/figure-html/total_steps_hist_imp-1.png" width="672" />
+
 The plot looks similar to the first one where the missing values were not imputed. The main difference is increase in the count of total daily number of steps between 7500 and 12500.
 
-```{r total_steps_stats_imp}
+
+```r
 med_imp = median(steps_by_day_imp$steps)
 mn_imp = as.integer(round(mean(steps_by_day_imp$steps), digits = 0))
 ```
 
-The median of total number of steps taken per day with imputed missing values is `r med_imp` and the mean is `r mn_imp`. The values do not differ too much from the previous values, the median is slightly lower, the mean is the same. In this example imputing of the values does not have much impact on the analysis. 
+The median of total number of steps taken per day with imputed missing values is 10763 and the mean is 10767. The values do not differ too much from the previous values, the median is slightly lower, the mean is the same. In this example imputing of the values does not have much impact on the analysis. 
 
 However, we could find a more sophisticated way of imputing missing values, for instance take into account trends in the data (increasing) and also the fact all the values were missing for 01-10-2012 - we could exclude this day from calculations for instance.
 
@@ -125,7 +135,8 @@ However, we could find a more sophisticated way of imputing missing values, for 
 
 Let's analyse now if there are differences in activity patterns between weekdays and weekends.
 
-```{r weekday_patters}
+
+```r
 weekdays = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 activity_imputed$day <- weekdays(activity_imputed$date)
 activity_imputed$wd_we <- ifelse(activity_imputed$day %in% weekdays, "weekday", "weekend")
@@ -140,6 +151,8 @@ g + geom_line(aes(color = wd_we)) +
     facet_grid(wd_we ~ .) + 
     theme_bw()
 ```
+
+<img src="PA1_template_files/figure-html/weekday_patters-1.png" width="672" />
 
 The plot indicates that there is on average less activity during the weekend, especially on itervals 0 to around 800. Then, there is slightly more activity on the weekends on the intervals about 800.
 
